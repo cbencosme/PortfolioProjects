@@ -1,0 +1,75 @@
+https://console.cloud.google.com/bigquery?sq=648212644302:de1e7f5df5614ef1b3af1c8b8fa98c90
+
+SELECT * 
+FROM `mydataproject12345-407018.Covid_Data.Covid_Deaths` 
+Where continent is not null
+Order by 3,4
+LIMIT 1000
+
+SELECT Location, date, total_cases, new_cases, total_deaths, population
+FROM `mydataproject12345-407018.Covid_Data.Covid_Deaths` 
+Order by 1, 2
+LIMIT 1000
+
+--Looking at Total Cases vs Total Deaths
+
+SELECT Location, date, total_cases, total_deaths, (total_deaths/total_cases) * 100 as Death_Percentage
+FROM `mydataproject12345-407018.Covid_Data.Covid_Deaths` 
+Where location = 'United States'
+Order by 1, 2
+
+--Looking at Total Cases vs Population
+-- Shows what % of population got Covid
+
+SELECT Location, date, total_cases, population, (total_cases/population) * 100 as Cases_percentage
+FROM `mydataproject12345-407018.Covid_Data.Covid_Deaths` 
+Where location = 'United States'
+Order by 1, 2
+
+--Looking at countries with the highest infection rate compared to population
+
+SELECT Location, population, Max(total_cases) as Highest_Infection_Count, Max((total_cases/population))*100 as Highest_Infection_percentage
+FROM `mydataproject12345-407018.Covid_Data.Covid_Deaths` 
+--Where location = 'United States'
+GROUP BY Location, population
+Order by Highest_Infection_percentage desc
+
+--Looking at countries with highest death count per population
+
+SELECT Location, Max(total_deaths) as Total_Death_Count
+FROM `mydataproject12345-407018.Covid_Data.Covid_Deaths` 
+--Where location = 'United States'
+Where continent is not null
+GROUP BY Location
+Order by Total_Death_Count desc
+
+--Breaking things down by Continents
+-- Looking at Continents with the highest death counts
+
+SELECT location, Max(total_deaths) as Total_Death_Count
+FROM `mydataproject12345-407018.Covid_Data.Covid_Deaths` 
+Where continent is null and location <> 'High income' and location <> 'Upper middle income' and location <> 'Lower middle income' and location <> 'Low income'
+GROUP BY location
+Order by Total_Death_Count desc
+
+--Global numbers
+Select SUM(new_cases) as total_cases, SUM(new_deaths) as total_deaths
+FROM `mydataproject12345-407018.Covid_Data.Covid_Deaths` 
+Where continent is null and location <> 'High income' and location <> 'Upper middle income' and location <> 'Lower middle income' and location <> 'Low income'
+order by 1,2
+
+--Global Death %
+Select SUM(new_cases) as total_cases, SUM(new_deaths) as total_deaths, SUM(new_deaths)/SUM(new_cases)*100 as Death_percentage
+FROM `mydataproject12345-407018.Covid_Data.Covid_Deaths` 
+Where continent is null and location <> 'High income' and location <> 'Upper middle income' and location <> 'Lower middle income' and location <> 'Low income'
+order by 1,2
+
+--Joining tables to explore data surrounding vaccinations
+
+Select dea.continent, dea.location, dea.date, dea.population, vac.new_vaccinations
+, SUM(vac.new_vaccinations) OVER (PARTITION BY dea.location Order by dea.location, dea.date) as Rolling_people_vaccinated
+From `mydataproject12345-407018.Covid_Data.Covid_Deaths` as dea
+Join `mydataproject12345-407018.Covid_Data.Covid_Vaccinations` as vac
+on dea.location = vac.location and dea.date = vac.date and dea.continent = vac.continent
+Where dea.continent is not null
+Order by 2,3
