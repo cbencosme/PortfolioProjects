@@ -1,0 +1,73 @@
+https://console.cloud.google.com/bigquery?sq=648212644302:a9cba8f4c50b49b5a87303cfeb8097ea
+
+--Looking at the top stepstotal taken in day by each user
+
+SELECT DISTINCT(Id), MAX(StepTotal) AS Highest_Step_Count
+FROM `mydataproject12345-407018.Capstone_Project.Hourly_data`
+GROUP BY Id
+ORDER BY Highest_Step_Count DESC
+
+--Looking at the avg stepstotal taken in day by each user
+
+SELECT DISTINCT(Id), Round(AVG(StepTotal)) AS Avg_Step_Count
+FROM `mydataproject12345-407018.Capstone_Project.Hourly_data`
+GROUP BY Id
+ORDER BY Avg_Step_Count DESC
+
+--Looking at average steps taken per day of the week
+
+SELECT Day_of_Week, AVG(StepTotal) AS Avg_Steps_Per_Day
+FROM `mydataproject12345-407018.Capstone_Project.Hourly_data`
+GROUP BY Day_of_Week
+ORDER BY Avg_Steps_Per_day DESC
+
+--Looking at average steps taken per hour of the day
+
+SELECT Time_of_Day, Round(AVG(StepTotal)) AS Time_Steps_Per_Day
+FROM `mydataproject12345-407018.Capstone_Project.Hourly_data`
+GROUP BY Time_of_Day
+ORDER BY Time_Steps_Per_day DESC
+
+--Looking at average daily distance alongside avg daily steps
+
+
+SELECT Round(AVG(Totaldistance)) as Avg_Total_distance, Round(AVG(TotalSteps)) as Avg_Daily_Steps
+FROM `mydataproject12345-407018.Capstone_Project.Daily_data` LIMIT 10
+
+--Looking at activity lvls minutes per day. Scaled 4-1
+
+SELECT Round(AVG(VeryActiveMinutes)) as active_lvl4, Round(AVG(FairlyActiveMinutes)) as active_lvl3, 
+Round(AVG(LightlyActiveMinutes)) as active_lvl2, Round(AVG(SedentaryMinutes)) as active_lvl1
+FROM `mydataproject12345-407018.Capstone_Project.Daily_data` LIMIT 10
+
+--Looking at avg weight and BMI lvls for each mbr_id#
+
+SELECT Distinct(ID), AVG(WeightPounds) As avg_weight_lbs, AVG(BMI) As avg_BMI,
+ FROM `mydataproject12345-407018.Capstone_Project.Weight_data`
+ Group BY Id
+ Order by avg_weight_lbs DESC
+
+--Looking at avg weight and BMI lvls overall
+
+ SELECT Round(AVG(WeightPounds)) As avg_weight_lbs, Round(AVG(BMI)) As avg_BMI,
+ FROM `mydataproject12345-407018.Capstone_Project.Weight_data`
+ Order by avg_weight_lbs DESC
+
+ --Looking at the range between the weight(lbs) & BMI lvls
+
+ SELECT Max(WeightPounds) As Highest_weight_lbs, MAX(BMI) As Highest_BMI,MIN(WeightPounds) As Lowest_weight_lbs, MIN(BMI) As Lowest_BMI,
+ FROM `mydataproject12345-407018.Capstone_Project.Weight_data`
+
+ -- Looking at the avg minutes asleep vs avg time in bed and the avg length it takes to fall asleep
+
+SELECT Avg(TotalTimeInBed) as Time_in_Bed, Avg(TotalMinutesAsleep) as Sleep_Time,
+Avg(TotalTimeInBed) - Avg(TotalMinutesAsleep) as avg_time_to_fall_asleep
+FROM `mydataproject12345-407018.Capstone_Project.sleep_daily_data`
+
+-- Looking at overall avg weight alongside BMI and Sleep time
+
+SELECT AVG(Weight.WeightPounds) as Avg_Weight, AVG(Weight.BMI) as Avg_BMI, 
+AVG(Sleep.TotalMinutesAsleep) as Sleep_Time
+FROM `mydataproject12345-407018.Capstone_Project.Weight_data` as Weight
+Full Outer JOIN `mydataproject12345-407018.Capstone_Project.sleep_daily_data` as Sleep
+ON Weight.Id = Sleep.Id
